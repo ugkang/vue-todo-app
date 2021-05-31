@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Todo</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Todo App</h1>
+
+        <div>
+            <input type="text" v-model="inputText" v-on:keyup.enter="addItem">
+            <button v-on:click="addItem">add</button>
+            <!-- <button @:click="removeAllItems">clear</button> -->
+            <button v-on:click="removeAllItems">clear</button>
+        </div>
+    
+        <div>
+            <ul>
+                <li v-for="(todoItem, index) in todoItems">
+                    <span>{{ todoItem }}</span>
+                    <button v-on:click="removeItem(todoItem, index)">remove</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                inputText: '',
+                todoItems: []//배열 선언
+            },
+            methods: {
+                addItem: function() {
+                    if (!this.inputText.length) {
+                        return;
+                    }
+                    var value = this.inputText && this.inputText.trim();
+
+                    this.todoItems.push(value);//배열에 입력값 추가
+
+                    //web browser localStorage에 저장(key, value)
+                    localStorage.setItem(value, value);
+                    this.clearInput();//inputText clear
+                },
+                removeItem: function(todoItem, index) {
+                    this.todoItems.splice(index, 1);//배열의 index에 해당하는 항목 1개 삭제
+                    localStorage.removeItem(todoItem);//브라우저의 localStorage 삭제
+                },
+                removeAllItems: function() {
+                    console.log(this);
+                    this.todoItems = [];
+                    localStorage.clear();
+                    this.clearInput();
+                    this.fetchItems();
+                },
+                    clearInput: function() {
+                    this.inputText = '';
+                },
+                //localStorage에 있는 모든 데이터를 가져온다.
+                fetchItems: function() {
+                    for (var i = 0; i < localStorage.length; i++) {
+                        this.todoItems.push(localStorage.key(i));//localStorage key에 접근
+                    }
+                    this.todoItems.sort();
+                }       
+            },
+            /* Vue 인스턴스가 생성될 때 created 메서드가 수행하도록 메서드 선언
+               - Vue lifecycle 콜백 메서드:
+                 beforeCreate, created, beforeUpdate, updated, beforeDestroy, destroyed
+            */
+            created: function() {
+                this.fetchItems();
+            }   
+        });
+
+    </script>
+</body>
+</html>
